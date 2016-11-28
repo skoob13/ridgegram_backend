@@ -4,8 +4,8 @@ export default {
   // POST /api/signin
   signin: {
     body: {
-      cellphone: Joi.string().min(1),
-      password: Joi.string()
+      cellphone: Joi.string().min(1).required(),
+      password: Joi.string().required()
     }
   },
 
@@ -17,7 +17,7 @@ export default {
       fullname: Joi.string().min(1).required(),
       gender: Joi.string().required(),
       description: Joi.string(),
-      avatar: Joi.string().uri()
+      avatarUrl: Joi.string().uri()
     }
   },
 };

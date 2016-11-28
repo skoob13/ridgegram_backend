@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import config from '../../config/env';
 import Account from '../models/account.model';
+import Avatar from '../models/avatar.model';
 import jwt from 'jsonwebtoken';
 
 /**
@@ -59,10 +60,10 @@ async function signUp(req, res, next) {
     password,
     fullname,
     gender,
-    avatar,
+    avatarUrl,
     description,
   } = req.body;
-
+  console.log(req.body);
   if (cellphone && password) {
     const existingAccount = await Account.findOne({ cellphone: cellphone });
     if (existingAccount) {
@@ -71,7 +72,7 @@ async function signUp(req, res, next) {
     }
 
     const avatar = new Avatar({
-      url: avatar,
+      url: avatarUrl,
       description: description,
     });
 
