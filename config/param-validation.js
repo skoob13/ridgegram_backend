@@ -20,4 +20,18 @@ export default {
       avatarUrl: Joi.string().uri()
     }
   },
+
+  // GET /api/users/
+  users: {
+    query: {
+      offset: Joi.number().min(0),
+    }
+  },
+
+  // POST /api/user/like
+  likeUser: {
+    body: {
+      id: Joi.string().min(1).required(),
+    }
+  },
 };

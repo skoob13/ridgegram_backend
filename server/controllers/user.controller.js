@@ -15,19 +15,17 @@ async function getUser(req, res) {
     const user = await Account.findById(req.params.id).populate('avatar');
 
     if (user) {
-      // Bad construction
-      let plainUser = {
+      return res.send({
         id: user._id,
-        ...user.toObject(),
-      }
-
-      delete plainUser._id;
-      delete plainUser.password;
-      delete plainUser.__v;
-      delete plainUser.avatar._id;
-      delete plainUser.avatar.__v;
-
-      return res.send(plainUser);
+        cellphone: user.cellphone,
+        fullname: user.fullname,
+        gender: user.gender,
+        avatar: {
+          url: user.avatar.url,
+          likesCount: user.avatar.likesCount,
+          description: user.avatar.description
+        }
+      });
     }
     const error = new APIError('User not exist!', httpStatus[400]);
     return res.send(error);
@@ -38,4 +36,63 @@ async function getUser(req, res) {
   }
 }
 
-export default { getUser };
+/**
+ * Return user list by gender
+ * @param req
+ * @param res
+ * @returns {*}
+ */
+async function getUserList(req, res) {
+  const gender = req.user.gender === 'female' ? 'male' : 'female';
+  const offset = req.query.offset ? req.query.offset : 0;
+
+  try {
+    let users = await Account.find({ gender: gender }).populate('avatar').skip(offset).limit(50);
+    let newUsers = [];
+    users.forEach((user) => {
+      newUsers.push({
+        id: user._id,
+        cellphone: user.cellphone,
+        fullname: user.fullname,
+        gender: user.gender,
+        avatar: {
+          url: user.avatar.url,
+          likesCount: user.avatar.likesCount,
+          description: user.avatar.description
+        }
+      });
+    });
+    return res.send(newUsers);
+  }
+  catch(e) {
+    const error = new APIError('Server error!', httpStatus[400]);
+    return res.send(error);
+  }
+}
+
+/**
+ * Like user's avatar
+ * @param req
+ * @param res
+ * @returns {*}
+ */
+async function likeUser(req, res) {
+  const id = req.body.id;
+
+  try {
+    const user = await Account.findById(id).populate('avatar');
+    const avatar = await Avatar.like(user.avatar._id);
+    res.send({
+      url: avatar.url,
+      likesCount: avatar.likesCount,
+      description: avatar.description
+    });
+  }
+  catch(e) {
+    console.log(e);
+    const error = new APIError('Server error!', httpStatus[400]);
+    return res.send(error);
+  }
+}
+
+export default { getUser, getUserList, likeUser };

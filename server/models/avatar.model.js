@@ -29,13 +29,13 @@ const AvatarSchema = new mongoose.Schema({
  * Static method for inc likes count
  */
 AvatarSchema.statics = {
-  incrementLikes(id) {
+  like(id) {
     return this.findOne({ _id: id })
       .exec()
       .then((avatar) => {
         if (avatar) {
           avatar.likesCount++;
-          return avatar.save().exec().then((savedAccount) => {
+          return avatar.save().then((savedAccount) => {
             if (savedAccount) return savedAccount;
             const err = new APIError('Saving error!', httpStatus.NOT_FOUND);
             return Promise.reject(err);
