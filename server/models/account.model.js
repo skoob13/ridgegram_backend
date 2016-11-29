@@ -83,6 +83,7 @@ AccountSchema.statics = {
    */
   getByCellphone(cellphone) {
     return this.findOne({ cellphone: cellphone })
+      .populate('avatar')
       .exec()
       .then((account) => {
         if (account) {

@@ -39,7 +39,20 @@ async function signIn(req, res, next) {
       };
 
       let token = jwt.sign(payload, config.jwtSecret);
-      res.send(token);
+      res.send({
+        token: token,
+        user: {
+          id: account._id,
+          cellphone: account.cellphone,
+          fullname: account.fullname,
+          gender: account.gender,
+          avatar: {
+            url: account.avatar.url,
+            likesCount: account.avatar.likesCount,
+            description: account.avatar.description
+          }
+        }
+      });
     });
   } else {
     const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
@@ -97,7 +110,20 @@ async function signUp(req, res, next) {
           };
 
           let token = jwt.sign(payload, config.jwtSecret);
-          return res.send(token);
+          res.send({
+            token: token,
+            user: {
+              id: account._id,
+              cellphone: account.cellphone,
+              fullname: account.fullname,
+              gender: account.gender,
+              avatar: {
+                url: avatar.url,
+                likesCount: avatar.likesCount,
+                description: avatar.description
+              }
+            }
+          });
         } else {
           const error = new APIError('Saving error', httpStatus[400]);
           return res.send(error);
