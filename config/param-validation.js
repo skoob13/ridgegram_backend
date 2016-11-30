@@ -17,7 +17,7 @@ export default {
       fullname: Joi.string().min(1).required(),
       gender: Joi.string().required(),
       description: Joi.string(),
-      avatarUrl: Joi.string().uri()
+      avatar: Joi.string().uri()
     }
   },
 

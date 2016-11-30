@@ -2,6 +2,7 @@ import express from 'express';
 import validate from 'express-validation';
 import paramValidation from '../../config/param-validation';
 import userCtrl from '../controllers/user.controller';
+import imageCtrl from '../controllers/image.controller';
 import passport from 'passport';
 
 const router = express.Router(); // eslint-disable-line new-cap
@@ -14,5 +15,7 @@ router.get('/users', passport.authenticate('jwt', {session: false}), validate(pa
 
 // POST user/like - like user's avatar
 router.post('/user/like', passport.authenticate('jwt', {session: false}), validate(paramValidation.likeUser), userCtrl.likeUser);
+
+router.get('/image/:id', imageCtrl.getImage);
 
 export default router;

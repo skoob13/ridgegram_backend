@@ -39,7 +39,7 @@ async function signIn(req, res, next) {
       };
 
       let token = jwt.sign(payload, config.jwtSecret);
-      res.send({
+      return res.send({
         token: token,
         user: {
           id: account._id,
@@ -73,10 +73,10 @@ async function signUp(req, res, next) {
     password,
     fullname,
     gender,
-    avatarUrl,
+    avatar,
     description,
   } = req.body;
-  console.log(req.body);
+
   if (cellphone && password) {
     const existingAccount = await Account.findOne({ cellphone: cellphone });
     if (existingAccount) {
@@ -84,52 +84,60 @@ async function signUp(req, res, next) {
       return res.send(error);
     }
 
-    const avatar = new Avatar({
-      url: avatarUrl,
-      description: description,
+    const account = new Account({
+      cellphone: cellphone,
+      password: password,
+      fullname: fullname,
+      gender: gender,
     });
 
-    avatar.save((error, savedAvatar) => {
-      if (error) {
+    account.save((err, account) => {
+      if (!err) {
+        const avatarObj = new Avatar({
+          url: avatar.substring(0, 4) === 'data' ? config.avatarAddress + account._id : avatar,
+          description: description,
+          data: avatar.substring(0, 4) === 'data' ? avatar : '',
+        });
+
+        avatarObj.save((error, savedAvatar) => {
+          if (error) {
+            const error = new APIError('Saving error', httpStatus[400]);
+            return res.send(error);
+          }
+
+          account.avatar = savedAvatar;
+          account.save((error, savedAcccount) => {
+            if (error) {
+              const error = new APIError('Saving error', httpStatus[400]);
+              return res.send(error);
+            }
+            
+            let payload = {
+              sub: savedAcccount._id,
+            };
+
+            let token = jwt.sign(payload, config.jwtSecret);
+            return res.send({
+              token: token,
+              user: {
+                id: savedAcccount._id,
+                cellphone: savedAcccount.cellphone,
+                fullname: savedAcccount.fullname,
+                gender: savedAcccount.gender,
+                avatar: {
+                  url: savedAvatar.url,
+                  likesCount: savedAvatar.likesCount,
+                  description: savedAvatar.description
+                }
+              }
+            });
+          });
+        })
+      } else {
         const error = new APIError('Saving error', httpStatus[400]);
         return res.send(error);
       }
-
-      const account = new Account({
-        cellphone: cellphone,
-        password: password,
-        fullname: fullname,
-        gender: gender,
-        avatar: savedAvatar
-      });
-
-      account.save((err, account) => {
-        if (!err) {
-          let payload = {
-            sub: account._id,
-          };
-
-          let token = jwt.sign(payload, config.jwtSecret);
-          res.send({
-            token: token,
-            user: {
-              id: account._id,
-              cellphone: account.cellphone,
-              fullname: account.fullname,
-              gender: account.gender,
-              avatar: {
-                url: avatar.url,
-                likesCount: avatar.likesCount,
-                description: avatar.description
-              }
-            }
-          });
-        } else {
-          const error = new APIError('Saving error', httpStatus[400]);
-          return res.send(error);
-        }
-      });
-    })
+    });
   } else {
     const error = new APIError('Some fields are incorrect', httpStatus[400]);
     return res.send(error);

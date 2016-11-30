@@ -23,6 +23,11 @@ const AvatarSchema = new mongoose.Schema({
     default: '',
     trim: true,
   },
+  data: {
+    type: String,
+    default: '',
+    trim: true,
+  },
 });
 
 /**
