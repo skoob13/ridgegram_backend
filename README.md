@@ -1,4 +1,7 @@
 # Ridgegram backend
+## Installation
+`npm install` (or `yarn`)
+`gulp serve`
 ## Based on
 * `Node.js`
 * `Express`
